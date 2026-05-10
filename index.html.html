@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAINEE_SEARCH: ISABELA RIBEIRO</title>
+    <style>
+        :root {
+            --matrix-green: #00ff41;
+            --dim-green: #003b00;
+            --matrix-dark: #020a02;
+            --accent-glow: rgba(0, 255, 65, 0.4);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background-color: var(--matrix-dark);
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            height: 100%;
+        }
+
+        /* Grade HUD Sutil */
+        body::before {
+            content: "";
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(var(--dim-green) 1px, transparent 1px), 
+                              linear-gradient(90deg, var(--dim-green) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #canvas { position: fixed; top: 0; left: 0; z-index: 1; opacity: 0.1; }
+
+        /* Hélice Lateral de Dados */
+        .helix-container {
+            position: fixed; left: 50px; top: 0; width: 2px; height: 100%;
+            z-index: 40; background: rgba(0, 255, 65, 0.05);
+        }
+        .bit {
+            position: absolute; width: 4px; height: 4px;
+            background: var(--matrix-green);
+            left: -1px;
+            box-shadow: 0 0 8px var(--matrix-green);
+            animation: moveBit 3s infinite linear;
+        }
+
+        @keyframes moveBit {
+            0% { top: 110%; opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { top: -10%; opacity: 0; }
+        }
+
+        #init-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: black; z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .container {
+            max-width: 850px; 
+            margin: 0 auto;
+            padding: 100px 5% 100px 120px; 
+            display: none; 
+            position: relative;
+            z-index: 50; 
+        }
+
+        section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-bottom: 60px;
+            padding: 25px;
+            background: rgba(0, 15, 0, 0.4);
+            border-left: 2px solid transparent;
+            backdrop-filter: blur(4px);
+        }
+
+        section.active {
+            opacity: 1;
+            transform: translateY(0);
+            border-left: 2px solid var(--matrix-green);
+        }
+
+        .decode-text {
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            color: var(--matrix-green);
+            margin-bottom: 20px;
+            display: block;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .highlight { color: var(--matrix-green); font-weight: bold; }
+
+        .skill-item {
+            border: 1px solid rgba(0, 255, 65, 0.2); 
+            padding: 10px 18px;
+            display: inline-block; margin: 8px; 
+            font-size: 11px;
+            background: rgba(0, 30, 0, 0.3);
+            transition: 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .skill-item:hover {
+            background: var(--matrix-green);
+            color: black;
+            box-shadow: 0 0 15px var(--matrix-green);
+            transform: scale(1.05);
+        }
+
+        .btn-hire {
+            background: transparent; color: var(--matrix-green);
+            border: 1px solid var(--matrix-green);
+            padding: 15px 40px; cursor: pointer;
+            font-family: inherit; font-size: 0.85rem;
+            letter-spacing: 4px;
+            transition: 0.4s;
+            text-transform: uppercase;
+        }
+
+        .btn-hire:hover {
+            box-shadow: 0 0 30px var(--matrix-green);
+            background: rgba(0, 255, 65, 0.1);
+        }
+
+        .btn-active {
+            background: var(--matrix-green) !important;
+            color: black !important;
+            box-shadow: 0 0 50px var(--matrix-green) !important;
+        }
+
+        p { line-height: 1.8; color: #d0d0d0; font-size: 0.95rem; text-align: justify; }
+
+        .crt-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 2px);
+            pointer-events: none; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="init-overlay">
+        <div id="text1" style="font-size: 0.9rem; color: var(--matrix-green); letter-spacing: 6px;"></div>
+        <button class="btn-hire" id="start-btn" style="opacity: 0; margin-top: 30px;" onclick="startExperience()">[ INICIALIZAR_SISTEMA ]</button>
+    </div>
+
+    <div class="helix-container" id="helix"></div>
+
+    <canvas id="canvas"></canvas>
+    <div class="crt-overlay"></div>
+
+    <div class="container" id="main-content">
+        <header style="margin-bottom: 60px; border-bottom: 1px solid rgba(0, 255, 65, 0.1); padding-bottom: 10px;">
+            <div style="font-size: 0.7rem; color: var(--matrix-green);">ACCESS_GRANTED: ISABELA_RIBEIRO_LIMA</div>
+            <div style="font-size: 0.6rem; opacity: 0.4; letter-spacing: 2px;">SECURE_PROTOCOL_ENFORCED</div>
+        </header>
+
+        <section class="reveal">
+            <span class="decode-text" data-value="PERFIL_DO_SISTEMA">PERFIL_DO_SISTEMA</span>
+            <p>
+                Operando na intersecção entre <span class="highlight">análise técnica</span> e <span class="highlight">gestão administrativa</span>. Minha trajetória foi construída sobre responsabilidade e busca constante por eficiência.
+            </p>
+            <p>
+                No setor financeiro, percebi que a solução para problemas de negócio estava escondida nos dados. Isso me levou a desenvolver autonomamente automações em <span class="highlight">VBA</span>, reduzindo erros e elevando a produtividade da equipe.
+            </p>
+            <p>
+                Atualmente, foco minha evolução para o mercado de tecnologia, aprimorando meu arsenal técnico em <span class="highlight">Python, SQL e Apps Script</span>. Estou pronta para transformar organização em estratégia e extrair insights reais através dos dados.
+            </p>
+        </section>
+
+        <section class="reveal">
+            <span class="decode-text" data-value="MÓDULOS_DE_HABILIDADE">MÓDULOS_DE_HABILIDADE</span>
+            <div class="skill-grid">
+                <span class="skill-item">PYTHON_DATA</span>
+                <span class="skill-item">SQL_SERVER</span>
+                <span class="skill-item">VBA_EXCEL</span>
+                <span class="skill-item">APPS_SCRIPT</span>
+                <span class="skill-item">POWER_BI</span>
+                <span class="skill-item">DATA_MINING</span>
+            </div>
+        </section>
+
+        <section class="reveal" style="background: transparent; border: none; text-align: center;">
+            <button class="btn-hire" id="dl-button" onclick="downloadLogic()">[ EXTRAIR_DATA_PACK_PDF ]</button>
+        </section>
+    </div>
+
+    <script>
+        function createHelix() {
+            const helix = document.getElementById('helix');
+            for(let i=0; i<20; i++) {
+                let bit = document.createElement('div');
+                bit.className = 'bit';
+                bit.style.animationDelay = (Math.random() * 3) + 's';
+                bit.style.left = (Math.random() * 14 - 7) + 'px';
+                helix.appendChild(bit);
+            }
+        }
+
+        function scrambleText(element) {
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@_";
+            let interval = null;
+            let iteration = 0;
+            const originalValue = element.dataset.value;
+            clearInterval(interval);
+
+            interval = setInterval(() => {
+                element.innerText = originalValue
+                    .split("")
+                    .map((letter, index) => {
+                        if(index < iteration) return originalValue[index];
+                        return letters[Math.floor(Math.random() * letters.length)];
+                    })
+                    .join("");
+
+                if(iteration >= originalValue.length) clearInterval(interval);
+                iteration += 1 / 3;
+            }, 40);
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let columns, drops;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            columns = Math.floor(canvas.width / 20);
+            drops = Array(columns).fill(1);
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(2, 10, 2, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#003b00';
+            ctx.font = '15px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = Math.floor(Math.random() * 2);
+                ctx.fillText(text, i * 20, drops[i] * 20);
+                if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+
+        function startExperience() {
+            document.getElementById('init-overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            setInterval(drawMatrix, 50);
+            createHelix();
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        const textElem = entry.target.querySelector('.decode-text');
+                        if(textElem) scrambleText(textElem);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(section => observer.observe(section));
+        }
+
+        function downloadLogic() {
+            const btn = document.getElementById('dl-button');
+            // Link atualizado conforme solicitado
+            const resumeUrl = "https://drive.google.com/file/d/1_D7Pjbp6btydw4-HbV_AQIvUkR98BldU/view?usp=drive_link";
+
+            btn.innerText = "EXTRAINDO...";
+            btn.classList.add('btn-active');
+
+            setTimeout(() => {
+                btn.innerText = "DOWNLOAD_CONCLUÍDO";
+
+                // Abre o link em uma nova aba
+                window.open(resumeUrl, '_blank');
+
+                // Reseta o botão após 3 segundos
+                setTimeout(() => {
+                    btn.innerText = "[ EXTRAIR_DATA_PACK_PDF ]";
+                    btn.classList.remove('btn-active');
+                }, 3000);
+
+            }, 2000);
+        }
+
+        window.onload = () => {
+            initCanvas();
+            let i = 0;
+            const txt = "> ESTABELECENDO_LINK_SINTECH...";
+            function type() {
+                if (i < txt.length) {
+                    document.getElementById('text1').innerHTML += txt.charAt(i);
+                    i++;
+                    setTimeout(type, 60);
+                } else {
+                    document.getElementById('start-btn').style.opacity = "1";
+                    document.getElementById('start-btn').style.transition = "1s";
+                }
+            }
+            type();
+        };
+        window.onresize = initCanvas;
+    </script>
+</body>
+</html>
